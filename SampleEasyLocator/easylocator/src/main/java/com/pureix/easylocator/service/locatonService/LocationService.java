@@ -203,7 +203,7 @@ public class LocationService extends Service implements
             sendLocationToBroadcast(location);
             if(locationReceiverListener !=null) {
                 locationReceiverListener.getLastKnownLocation(location);
-                locationReceiverListener.onLocationChanged(location);
+//                locationReceiverListener.onLocationChanged(location);
             }
         } catch (Exception e) {
         }

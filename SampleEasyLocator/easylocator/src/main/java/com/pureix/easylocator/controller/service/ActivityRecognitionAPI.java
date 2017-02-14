@@ -86,4 +86,8 @@ public class ActivityRecognitionAPI
 
         return arrayAdapter;
     }
+
+    public static String getActivityString(Context context, int detectedActivityType) {
+        return Constants.getActivityString(context, detectedActivityType);
+    }
 }

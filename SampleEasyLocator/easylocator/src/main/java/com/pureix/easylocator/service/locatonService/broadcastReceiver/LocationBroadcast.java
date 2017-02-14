@@ -69,7 +69,9 @@ public class LocationBroadcast extends BroadcastReceiver
                 if ("LocalStorage".equals(location.getProvider())) {
                     locationReceiverListener.getLastKnownLocation(location);
                 }
-                locationReceiverListener.onLocationChanged(location);
+                if (!"LocalStorage".equals(location.getProvider())){
+                    locationReceiverListener.onLocationChanged(location);
+                }
             }
 
             float kMeter = location.getSpeed() * 3.6f;

@@ -27,9 +27,10 @@ public class ActivityRecognitionBroadcast extends BroadcastReceiver
         ArrayList<DetectedActivity> updatedActivities =
                 intent.getParcelableArrayListExtra(Constants.ACTIVITY_EXTRA);
 
-        Log.d("mezoTag", "okay here we are hhhhh");
+//        Log.d("mezoTag", "okay here we are hhhhh");
 
-        Toast.makeText(context, "okay here we are hhhhh", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "okay here we are hhhhh", Toast.LENGTH_SHORT).show();
+
 //        mDetectedActivities = new ArrayList<DetectedActivity>();
 //
 //        // Set the confidence level of each monitored activity to zero.

@@ -53,19 +53,18 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<DetectedActivity> tempList = ActivityRecognitionAPI.getArrayList(updatedActivities);
 
                 for (int i = 0; i < tempList.size(); i++) {
-                    txt.append(MONITORED_ACTIVITIES[tempList.get(i).getType()-1] +" - "
-                    + tempList.get(i).getConfidence() +" - "
-                    + tempList.get(i).getVersionCode()+"\n");
+                    txt.append(ActivityRecognitionAPI.getActivityString(MainActivity.this,
+                            tempList.get(i).getType()) +" - "
+                    + tempList.get(i).getConfidence()+ "%"+"\n");
                 }
-                Toast.makeText(MainActivity.this, ""+tempList, Toast.LENGTH_SHORT).show();
+                txt.append("\n");
             }
         });
 
         InternetAPI.networkListener(new ConnectivityReceiverListener() {
             @Override
             public void onNetworkConnectionChanged(boolean isConnected, int connectionProvider) {
-                //txt.append();
-                //Toast.makeText(MainActivity.this, ""+isConnected, Toast.LENGTH_SHORT).show();
+                txt.append("isConnected"+isConnected+" - "+ connectionProvider +"\n\n");
             }
         });
 
@@ -73,21 +72,28 @@ public class MainActivity extends AppCompatActivity {
         BatteryAPI.batteryListener(new BatteryReceiverListener() {
             @Override
             public void onBatteryInformationChanged(int level, int scale, int temperature, int voltage, float batteryPct, int status, boolean isCharging, int chargePlug, boolean usbCharge, boolean acCharge) {
-                //Toast.makeText(MainActivity.this, ""+level, Toast.LENGTH_SHORT).show();
+                txt.append("level is " + level + "/" + scale +
+                        ", temp is " + temperature +
+                        ", voltage is " + voltage
+                        + " status :" + status +
+                        " chargePlug :" + chargePlug +
+                        " Battery Pct : " + batteryPct * 100 +"\n\n");
             }
         });
 
         LocationAPI.setLocationReceiverListener(new LocationReceiverListener() {
             @Override
             public void getLastKnownLocation(Location location) {
-                Toast.makeText(MainActivity.this, "Broadlocationss getLastKnownLocation "+location.toString()+"", Toast.LENGTH_SHORT).show();
+                txt.append("getLastKnownLocation "+location+"\n\n");
+//                Toast.makeText(MainActivity.this, "Broadlocationss getLastKnownLocation "+location.toString()+"", Toast.LENGTH_SHORT).show();
 //                Log.d("Taag", "Broadlocationss getLastKnownLocation "+location.toString()+"");
             }
 
             @Override
             public void onLocationChanged(Location location) {
-                Toast.makeText(MainActivity.this, "Broadlocationss onLocationChanged "+location.toString()+"", Toast.LENGTH_SHORT).show();
-                Log.d("Taag", "Broadlocationss onLocationChanged "+location.toString()+"");
+                txt.append("onLocationChanged "+location+"\n\n");
+//                Toast.makeText(MainActivity.this, "Broadlocationss onLocationChanged "+location.toString()+"", Toast.LENGTH_SHORT).show();
+//                Log.d("Taag", "Broadlocationss onLocationChanged "+location.toString()+"");
             }
         });
 

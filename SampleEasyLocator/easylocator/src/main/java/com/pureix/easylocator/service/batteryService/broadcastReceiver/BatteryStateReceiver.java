@@ -72,14 +72,14 @@ public class BatteryStateReceiver extends BroadcastReceiver
                         temperature, voltage, batteryPct, status, isCharging,
                         chargePlug, usbCharge, acCharge);
             }
-            Toast.makeText(context,
-                    "level is " + level + "/" + scale +
-                            ", temp is " + temperature +
-                            ", voltage is " + voltage
-                            + " status :" + status +
-                            " chargePlug :" + chargePlug +
-                            " Battery Pct : " + batteryPct * 100,
-                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context,
+//                    "level is " + level + "/" + scale +
+//                            ", temp is " + temperature +
+//                            ", voltage is " + voltage
+//                            + " status :" + status +
+//                            " chargePlug :" + chargePlug +
+//                            " Battery Pct : " + batteryPct * 100,
+//                    Toast.LENGTH_SHORT).show();
         }
     }
 }
