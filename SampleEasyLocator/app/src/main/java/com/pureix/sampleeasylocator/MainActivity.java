@@ -10,8 +10,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.pureix.easylocator.controller.service.ActivityRecognitionAPI;
 import com.pureix.easylocator.controller.service.BatteryAPI;
@@ -25,8 +28,13 @@ import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverLi
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+
+import static com.pureix.easylocator.controller.service.ActivityRecognitionAPI.MONITORED_ACTIVITIES;
 
 public class MainActivity extends AppCompatActivity {
+
+    private TextView txt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,16 +43,28 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ActivityRecognitionAPI.setActivitiesRecognitionListener(new ActivityRecognitionListener() {
+        txt = (TextView) findViewById(R.id.txt);
+
+        ActivityRecognitionAPI.setActivitiesRecognitionListener(new ActivityRecognitionListener()
+        {
             @Override
             public void updateDetectedActivitiesList(ArrayList<DetectedActivity> updatedActivities) {
                 //Toast.makeText(MainActivity.this, "okay", Toast.LENGTH_SHORT).show();
+                ArrayList<DetectedActivity> tempList = ActivityRecognitionAPI.getArrayList(updatedActivities);
+
+                for (int i = 0; i < tempList.size(); i++) {
+                    txt.append(MONITORED_ACTIVITIES[tempList.get(i).getType()-1] +" - "
+                    + tempList.get(i).getConfidence() +" - "
+                    + tempList.get(i).getVersionCode()+"\n");
+                }
+                Toast.makeText(MainActivity.this, ""+tempList, Toast.LENGTH_SHORT).show();
             }
         });
 
         InternetAPI.networkListener(new ConnectivityReceiverListener() {
             @Override
             public void onNetworkConnectionChanged(boolean isConnected, int connectionProvider) {
+                //txt.append();
                 //Toast.makeText(MainActivity.this, ""+isConnected, Toast.LENGTH_SHORT).show();
             }
         });

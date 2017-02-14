@@ -54,7 +54,7 @@ public final class Constants {
     /**
      * List of DetectedActivity types that we monitor in this sample.
      */
-    protected static final int[] MONITORED_ACTIVITIES = {
+    public static final int[] MONITORED_ACTIVITIES = {
             DetectedActivity.STILL,
             DetectedActivity.ON_FOOT,
             DetectedActivity.WALKING,
