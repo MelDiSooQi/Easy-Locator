@@ -1,0 +1,108 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.pureix.easylocator">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
+    <uses-feature android:name="android.hardware.location.gps" />
+
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
+    <application
+        android:name=".applicationManger.BaseApplication"
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <receiver
+            android:name=".service.activityRecognitionService.broadcastReceiver.ActivityRecognitionBroadcast"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".service.activityRecognitionService.ActivitiesRecognitionService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":ActivitiesRecognitionService"/>
+
+        <!-- Service that provides activity recognition data. Setting the android:exported attribute
+        to "false" stops other apps from starting this service, even when using an explicit
+        intent. -->
+        <service
+            android:name=".service.activityRecognitionService.ActivitiesRecognitionIntentService"
+            android:exported="false"
+            android:process=":ActivitiesRecognitionIntentService"/>
+
+
+        <receiver
+            android:name=".service.internetService.broadcastReceiver.ConnectivityReceiver"
+            android:enabled="true">
+            <intent-filter>
+
+                <!-- <action android:name="android.net.conn.CONNECTIVITY_CHANGE" /> -->
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".service.batteryService.broadcastReceiver.BatteryStateReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="android.intent.action.BATTERY_LOW" />
+                <action android:name="android.intent.action.BATTERY_OKAY" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.batteryService.BatteryService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":BatteryService">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="android.intent.action.BATTERY_LOW" />
+                <action android:name="android.intent.action.BATTERY_OKAY" />
+            </intent-filter>
+        </service>
+
+
+        <!-- android:process=":LocationService" Remove it if you will use binding -->
+        <service
+            android:name=".service.locatonService.LocationService"
+            android:enabled="true"
+            android:process=":LocationManagerService">
+            <intent-filter>
+                <action android:name="com.pureix.locationutility.service.LocationService" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".service.locatonService.broadcastReceiver.LocationBroadcast"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>
