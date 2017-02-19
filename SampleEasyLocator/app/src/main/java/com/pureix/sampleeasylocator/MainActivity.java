@@ -6,31 +6,24 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.pureix.easylocator.controller.service.ActivityRecognitionAPI;
 import com.pureix.easylocator.controller.service.BatteryAPI;
 import com.pureix.easylocator.controller.service.InternetAPI;
 import com.pureix.easylocator.controller.service.LocationAPI;
+import com.pureix.easylocator.controller.service.SmartLocationAPI;
+import com.pureix.easylocator.model.bean.CustomLocation;
 import com.pureix.easylocator.service.batteryService.listener.BatteryReceiverListener;
 import com.pureix.easylocator.service.activityRecognitionService.listener.ActivityRecognitionListener;
 import com.pureix.easylocator.service.internetService.listener.ConnectivityReceiverListener;
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-
-import static com.pureix.easylocator.controller.service.ActivityRecognitionAPI.MONITORED_ACTIVITIES;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -96,6 +89,24 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d("Taag", "Broadlocationss onLocationChanged "+location.toString()+"");
             }
         });
+
+        SmartLocationAPI smartLocationAPI = new SmartLocationAPI();
+        smartLocationAPI.smart(true);
+        if(!smartLocationAPI.isSmart()) {
+            smartLocationAPI.customLocation(new CustomLocation());
+        }
+        smartLocationAPI.setLocationReceiverListener(new LocationReceiverListener() {
+            @Override
+            public void getLastKnownLocation(Location location) {
+
+            }
+
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+        });
+
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
