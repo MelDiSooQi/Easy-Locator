@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SmartLocationAPI smartLocationAPI = new SmartLocationAPI();
+        SmartLocationAPI smartLocationAPI = new SmartLocationAPI(MainActivity.this);
         smartLocationAPI.smart(true);
         if(!smartLocationAPI.isSmart()) {
             smartLocationAPI.customLocation(new CustomLocation());
