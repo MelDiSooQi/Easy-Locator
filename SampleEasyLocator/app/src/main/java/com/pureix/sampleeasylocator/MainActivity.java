@@ -17,7 +17,7 @@ import com.pureix.easylocator.controller.service.BatteryAPI;
 import com.pureix.easylocator.controller.service.InternetAPI;
 import com.pureix.easylocator.controller.service.LocationAPI;
 import com.pureix.easylocator.controller.service.SmartLocationAPI;
-import com.pureix.easylocator.model.bean.CustomLocation;
+import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.service.batteryService.listener.BatteryReceiverListener;
 import com.pureix.easylocator.service.activityRecognitionService.listener.ActivityRecognitionListener;
 import com.pureix.easylocator.service.internetService.listener.ConnectivityReceiverListener;
@@ -28,6 +28,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private TextView txt;
+    private LocationAPI locationAPI;
+    private ActivityRecognitionAPI activityRecognitionAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +39,16 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         txt = (TextView) findViewById(R.id.txt);
-
-        ActivityRecognitionAPI.setActivitiesRecognitionListener(new ActivityRecognitionListener()
+        activityRecognitionAPI = new ActivityRecognitionAPI(MainActivity.this);
+        activityRecognitionAPI.setActivitiesRecognitionListener(new ActivityRecognitionListener()
         {
             @Override
             public void updateDetectedActivitiesList(ArrayList<DetectedActivity> updatedActivities) {
                 //Toast.makeText(MainActivity.this, "okay", Toast.LENGTH_SHORT).show();
-                ArrayList<DetectedActivity> tempList = ActivityRecognitionAPI.getArrayList(updatedActivities);
+                ArrayList<DetectedActivity> tempList = activityRecognitionAPI.getArrayList(updatedActivities);
 
                 for (int i = 0; i < tempList.size(); i++) {
-                    txt.append(ActivityRecognitionAPI.getActivityString(MainActivity.this,
+                    txt.append(activityRecognitionAPI.getActivityString(MainActivity.this,
                             tempList.get(i).getType()) +" - "
                     + tempList.get(i).getConfidence()+ "%"+"\n");
                 }
@@ -74,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        LocationAPI.setLocationReceiverListener(new LocationReceiverListener() {
+        locationAPI = new LocationAPI(MainActivity.this);
+        locationAPI.setLocationReceiverListener(new LocationReceiverListener() {
             @Override
             public void getLastKnownLocation(Location location) {
                 txt.append("getLastKnownLocation "+location+"\n\n");
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         SmartLocationAPI smartLocationAPI = new SmartLocationAPI(MainActivity.this);
         smartLocationAPI.smart(true);
         if(!smartLocationAPI.isSmart()) {
-            smartLocationAPI.customLocation(new CustomLocation());
+            smartLocationAPI.customLocation(new CustomSettingsLocation());
         }
         smartLocationAPI.setLocationReceiverListener(new LocationReceiverListener() {
             @Override
@@ -145,21 +148,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        ActivityRecognitionAPI.start(MainActivity.this);
-        LocationAPI.start(MainActivity.this);
+        activityRecognitionAPI.start();
+        locationAPI.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        ActivityRecognitionAPI.pause(MainActivity.this);
-        LocationAPI.pause(MainActivity.this);
+        activityRecognitionAPI.pause();
+        locationAPI.pause();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
                                            int[] grantResults) {
-        LocationAPI.onRequestPermissionsResult(requestCode, permissions,
+        locationAPI.requestPermission(MainActivity.this);
+        locationAPI.onRequestPermissionsResult(requestCode, permissions,
                 grantResults);
     }
 }

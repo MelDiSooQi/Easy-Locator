@@ -8,7 +8,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
 import com.pureix.easylocator.controller.service.ActivityRecognitionAPI;
+import com.pureix.easylocator.model.ObservableHandler;
 import com.pureix.easylocator.service.activityRecognitionService.Constants;
+import com.pureix.easylocator.service.activityRecognitionService.listener.ActivityRecognitionListener;
 
 import java.util.ArrayList;
 
@@ -16,7 +18,9 @@ public class ActivityRecognitionBroadcast extends BroadcastReceiver
 {
     protected static final String TAG = "activity-detection-response-receiver";
 
-    private ArrayList<DetectedActivity> mDetectedActivities;
+    public static ObservableHandler activitiesRecognitionObservable = new ObservableHandler();
+
+//    private ArrayList<DetectedActivity> mDetectedActivities;
 
     public ActivityRecognitionBroadcast() {
     }
@@ -27,10 +31,6 @@ public class ActivityRecognitionBroadcast extends BroadcastReceiver
         ArrayList<DetectedActivity> updatedActivities =
                 intent.getParcelableArrayListExtra(Constants.ACTIVITY_EXTRA);
 
-//        Log.d("mezoTag", "okay here we are hhhhh");
-
-//        Toast.makeText(context, "okay here we are hhhhh", Toast.LENGTH_SHORT).show();
-
 //        mDetectedActivities = new ArrayList<DetectedActivity>();
 //
 //        // Set the confidence level of each monitored activity to zero.
@@ -38,10 +38,6 @@ public class ActivityRecognitionBroadcast extends BroadcastReceiver
 //            mDetectedActivities.add(new DetectedActivity(Constants.MONITORED_ACTIVITIES[i], 0));
 //        }
 
-        if(ActivityRecognitionAPI.activitiesRecognitionListener != null) {
-            ActivityRecognitionAPI
-                    .activitiesRecognitionListener
-                    .updateDetectedActivitiesList(updatedActivities);
-        }
+        activitiesRecognitionObservable.setChange(updatedActivities);
     }
 }

@@ -12,6 +12,10 @@ import com.pureix.easylocator.service.activityRecognitionService.listener.Activi
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
+
+import static com.pureix.easylocator.service.activityRecognitionService.broadcastReceiver.ActivityRecognitionBroadcast.activitiesRecognitionObservable;
 
 /**
  * Created by MelDiSooQi on 2/11/2017.
@@ -19,13 +23,26 @@ import java.util.HashMap;
 
 public class ActivityRecognitionAPI
 {
+    private static int instanceCounter;
+
+    private Context context;
     public static final int[] MONITORED_ACTIVITIES = Constants.MONITORED_ACTIVITIES;
-    private static ArrayAdapter<DetectedActivity> arrayAdapter;
+    private ArrayAdapter<DetectedActivity> arrayAdapter;
 
-    private static InitializeActivityRecognitionBroadcast broadcast;
-    public static ActivityRecognitionListener activitiesRecognitionListener;
+    private InitializeActivityRecognitionBroadcast broadcast;
+    private ActivityRecognitionListener activitiesRecognitionListener;
 
-    public static void start(Context context)
+
+    public ActivityRecognitionAPI(Context context) {
+        this.context = context;
+        instanceCounter++;
+    }
+
+    public static int getInstanceCounter() {
+        return instanceCounter;
+    }
+
+    public void start()
     {
         Intent i = new Intent(context, ActivitiesRecognitionService.class);
         context.stopService(i);
@@ -35,22 +52,35 @@ public class ActivityRecognitionAPI
         broadcast.onResume(context);
     }
 
-    public static void pause(Context context)
+    public void pause()
     {
         broadcast.onPause(context);
     }
 
-    public static void setActivitiesRecognitionListener(ActivityRecognitionListener activitiesRecognitionListener) {
-        ActivityRecognitionAPI.activitiesRecognitionListener = activitiesRecognitionListener;
+    public void setActivitiesRecognitionListener(ActivityRecognitionListener activitiesRecognitionListener) {
+        this.activitiesRecognitionListener = activitiesRecognitionListener;
+        createListener();
     }
 
+    private void createListener() {
+        activitiesRecognitionObservable.addObserver(new Observer() {
+            @Override
+            public void update(Observable o, Object updatedActivities) {
+                if(activitiesRecognitionListener != null) {
+                    activitiesRecognitionListener
+                            .updateDetectedActivitiesList(
+                                    (ArrayList<DetectedActivity>) updatedActivities);
+                }
+            }
+        });
+    }
     /**
      * Process list of recently detected activities and updates the list of {@code DetectedActivity}
      * objects backing this adapter.
      *
      * @param detectedActivities the freshly detected activities
      */
-    public static ArrayList<DetectedActivity> getArrayList(ArrayList<DetectedActivity> detectedActivities)
+    public ArrayList<DetectedActivity> getArrayList(ArrayList<DetectedActivity> detectedActivities)
     {
         HashMap<Integer, Integer> detectedActivitiesMap = new HashMap<>();
         for (DetectedActivity activity : detectedActivities) {
@@ -73,7 +103,7 @@ public class ActivityRecognitionAPI
         return tempList;
     }
 
-    public static ArrayAdapter<DetectedActivity> getArrayAdapter(ArrayList<DetectedActivity> tempList)
+    public ArrayAdapter<DetectedActivity> getArrayAdapter(ArrayList<DetectedActivity> tempList)
     {
         // Remove all items.
         arrayAdapter.clear();
@@ -87,7 +117,7 @@ public class ActivityRecognitionAPI
         return arrayAdapter;
     }
 
-    public static String getActivityString(Context context, int detectedActivityType) {
+    public String getActivityString(Context context, int detectedActivityType) {
         return Constants.getActivityString(context, detectedActivityType);
     }
 }

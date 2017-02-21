@@ -2,7 +2,7 @@ package com.pureix.easylocator.controller.service;
 
 import android.content.Context;
 
-import com.pureix.easylocator.model.bean.CustomLocation;
+import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.service.SmartLocationBusiness;
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 
@@ -12,6 +12,8 @@ import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverLi
 
 public class SmartLocationAPI
 {
+    private static int instanceCounter;
+
     private boolean isSmart = true;
     private LocationReceiverListener locationReceiverListener;
     private SmartLocationBusiness smartLocationBusiness;
@@ -22,6 +24,11 @@ public class SmartLocationAPI
 
         smartLocationBusiness = new SmartLocationBusiness();
         smartLocationBusiness.setSmart(isSmart);
+        instanceCounter++;
+    }
+
+    public static int getInstanceCounter() {
+        return instanceCounter;
     }
 
     public void smart(boolean isSmart) {
@@ -33,8 +40,8 @@ public class SmartLocationAPI
         return isSmart;
     }
 
-    public void customLocation(CustomLocation customLocation) {
-        smartLocationBusiness.setCustomLocation(customLocation);
+    public void customLocation(CustomSettingsLocation customSettingsLocation) {
+        smartLocationBusiness.setCustomSettingsLocation(customSettingsLocation);
     }
 
     public void setLocationReceiverListener(LocationReceiverListener locationReceiverListener)
@@ -44,6 +51,6 @@ public class SmartLocationAPI
     }
 
     public void pause() {
-        smartLocationBusiness.pause(context);
+        smartLocationBusiness.pause();
     }
 }

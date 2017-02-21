@@ -7,15 +7,15 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.pureix.easylocator.model.ObservableHandler;
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 import com.pureix.easylocator.service.locatonService.ServicesConstant;
 import com.pureix.easylocator.service.locatonService.bean.Location;
 
-import static com.pureix.easylocator.controller.service.LocationAPI.locationReceiverListener;
-
 public class LocationBroadcast extends BroadcastReceiver
 {
-//    private static LocationReceiverListener locationReceiverListener;
+    public static ObservableHandler locationLastKnownLocationObservable = new ObservableHandler();
+    public static ObservableHandler locationChangedObservable = new ObservableHandler();
 
     boolean isLocationInitialized = false;
 
@@ -65,14 +65,12 @@ public class LocationBroadcast extends BroadcastReceiver
             android.location.Location location = new Gson()
                     .fromJson(jsonLocation, android.location.Location.class);
 
-            if(locationReceiverListener != null) {
                 if ("LocalStorage".equals(location.getProvider())) {
-                    locationReceiverListener.getLastKnownLocation(location);
+                    locationLastKnownLocationObservable.setChange(location);
                 }
                 if (!"LocalStorage".equals(location.getProvider())){
-                    locationReceiverListener.onLocationChanged(location);
+                    locationChangedObservable.setChange(location);
                 }
-            }
 
             float kMeter = location.getSpeed() * 3.6f;
 
@@ -87,9 +85,4 @@ public class LocationBroadcast extends BroadcastReceiver
             //Toast.makeText(context, "AFrom BroadCast : "+s, Toast.LENGTH_SHORT).show();
         }
     }
-
-//    public static void addLocationListener(LocationReceiverListener locationReceiverListener)
-//    {
-//        LocationBroadcast.locationReceiverListener = locationReceiverListener;
-//    }
 }

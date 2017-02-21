@@ -12,6 +12,7 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -21,17 +22,20 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
+import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.model.storage.LocalStorage;
 import com.pureix.easylocator.model.storage.LocalStorageConstant;
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 import com.pureix.easylocator.service.locatonService.broadcastReceiver.LocationBroadcast;
 import com.pureix.easylocator.service.locatonService.broadcastReceiver.LocationSender;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.pureix.easylocator.controller.service.LocationAPI.locationReceiverListener;
+import static com.pureix.easylocator.service.SmartLocationBusiness.smartLocationBusinessObservable;
 
 /**
  * Created by MelDiSooQi on 1/28/2017.
@@ -60,6 +64,7 @@ public class LocationService extends Service implements
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private GoogleApiClient mGoogleApiClient;
+    private LocationReceiverListener locationReceiverListener;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -134,6 +139,10 @@ public class LocationService extends Service implements
         //update the location every some distance
         //mLocationRequest.setSmallestDisplacement(10);
 
+
+        //updateStatus(0);
+
+
         servicesAvailable = servicesConnected();
 
         /*
@@ -141,6 +150,56 @@ public class LocationService extends Service implements
          * handle callbacks.
          */
         setUpLocationClientIfNeeded();
+    }
+
+    Timer mtimer2;
+    private void updateStatus(long time) {
+        mtimer2 = new Timer();
+        mtimer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CustomSettingsLocation customSettingsLocation
+                                = getCustomSettingsLocationInLocalStorage();
+                        if(customSettingsLocation != null)
+                        {
+                            detectedActivityType = customSettingsLocation.getDetectedActivityType();
+                            //Toast.makeText(context, ">>>>"+customSettingsLocation.getDetectedActivityProvider(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, ">>>>"+customSettingsLocation.getDetectedActivityProvider());
+
+                            if(detectedActivityType != tempDetectedActivityType) {
+                                mLocationRequest = LocationRequest.create();
+                                // Use high accuracy
+                                mLocationRequest.setPriority(customSettingsLocation.getPriority());
+                                // Set the update interval to 5 seconds
+                                mLocationRequest.setInterval(customSettingsLocation.getInterval());
+//        mLocationRequest.setInterval(1000);
+                                // Set the fastest update interval to 1 second
+//        mLocationRequest.setFastestInterval(1000);
+                                mLocationRequest.setFastestInterval(customSettingsLocation.getFastestInterval());
+                                //update the location every some distance
+                                mLocationRequest.setSmallestDisplacement(customSettingsLocation.getSmallestDisplacement());
+
+                                tempDetectedActivityType = detectedActivityType;
+                            }
+                        }
+                        updateStatus(500);
+                    }
+                }).start();
+            }
+        }, time);
+
+        if (mGoogleApiClient != null) {
+            if (mGoogleApiClient.isConnected()) {
+                LocationServices
+                        .FusedLocationApi
+                        .requestLocationUpdates(mGoogleApiClient,
+                                mLocationRequest,
+                                LocationService.this);
+            }
+        }
     }
 
     private void setUpLocationClientIfNeeded() {
@@ -374,6 +433,8 @@ public class LocationService extends Service implements
         super.onTaskRemoved(rootIntent);
     }
 
+    private int detectedActivityType = -1;
+    private int tempDetectedActivityType = -1;
     // Define the callback method that receives location updates
     @Override
     public void onLocationChanged(Location location) {
@@ -390,6 +451,12 @@ public class LocationService extends Service implements
         if(locationReceiverListener != null) {
             locationReceiverListener.onLocationChanged(location);
         }
+    }
+
+    private CustomSettingsLocation getCustomSettingsLocationInLocalStorage() {
+        String jsonLocation = (String) LocalStorage.getPreference(context,
+                LocalStorageConstant.CUSTOM_SETTINGS_LOCATION, null);
+        return new Gson().fromJson(jsonLocation, CustomSettingsLocation.class);
     }
 
 //    private void sendLocationToBroadcast(Location location) {
