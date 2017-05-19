@@ -3,17 +3,17 @@ package com.pureix.easylocator.service.batteryService.broadcastReceiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.widget.Toast;
 
-import com.pureix.easylocator.service.batteryService.listener.BatteryReceiverListener;
+import com.google.gson.Gson;
+import com.pureix.easylocator.service.batteryService.bean.BatteryInformation;
 
-import static com.pureix.easylocator.controller.service.BatteryAPI.batteryReceiverListener;
 
 public class BatteryStateReceiver extends BroadcastReceiver
 {
     //private static Context context;
+
+//    public static ObservableHandler batteryChangedObservable = new ObservableHandler();
 
 
     private static Boolean  batteryReceiverIsRegistered = false;
@@ -47,6 +47,8 @@ public class BatteryStateReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        BatteryInformationSender senderHandler = new BatteryInformationSender(context, BatteryAppSideBroadcast.class);
+
         int level       = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale       = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         int temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
@@ -67,11 +69,18 @@ public class BatteryStateReceiver extends BroadcastReceiver
 
         if(!(level == -1 && scale == -1 && temperature == -1 && voltage == -1
             && status == -1 && chargePlug == -1)) {
-            if(batteryReceiverListener != null) {
+            /*if(batteryReceiverListener != null) {
                 batteryReceiverListener.onBatteryInformationChanged(level, scale,
                         temperature, voltage, batteryPct, status, isCharging,
                         chargePlug, usbCharge, acCharge);
-            }
+            }*/
+                BatteryInformation batteryInformation = new BatteryInformation(level,
+                        scale, temperature, voltage, batteryPct, status, isCharging,
+                        chargePlug, usbCharge, acCharge);
+
+            sendBatteryInformationToBroadcast(senderHandler, batteryInformation);
+
+
 //            Toast.makeText(context,
 //                    "level is " + level + "/" + scale +
 //                            ", temp is " + temperature +
@@ -81,5 +90,12 @@ public class BatteryStateReceiver extends BroadcastReceiver
 //                            " Battery Pct : " + batteryPct * 100,
 //                    Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void sendBatteryInformationToBroadcast(BatteryInformationSender senderHandler,
+                                                   BatteryInformation batteryInformation) {
+        senderHandler
+                .sendBatteryInformationToApp(new Gson()
+                        .toJson(batteryInformation));
     }
 }

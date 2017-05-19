@@ -8,8 +8,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.pureix.easylocator.model.ObservableHandler;
-import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
-import com.pureix.easylocator.service.locatonService.ServicesConstant;
+import com.pureix.easylocator.service.locatonService.LocationServicesConstant;
 import com.pureix.easylocator.service.locatonService.bean.Location;
 
 public class LocationBroadcast extends BroadcastReceiver
@@ -25,19 +24,20 @@ public class LocationBroadcast extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle extras = intent.getExtras();
-        if(extras.getInt(ServicesConstant.SERVICE_ID) ==  ServicesConstant.SERVICE_ID_SEND_LOCATION)
+        if(extras.getInt(LocationServicesConstant.SERVICE_ID) ==
+                LocationServicesConstant.SERVICE_ID_SEND_LOCATION)
         {
             Location location;
 
-            int    USER_ID          = extras.getInt   (ServicesConstant.USER_ID);
-            double latitude         = extras.getDouble(ServicesConstant.LATITUDE);
-            double longitude        = extras.getDouble(ServicesConstant.LONGITUDE);
-            String locationProvider = extras.getString(ServicesConstant.LOCATION_PROVIDER);
-            Float  accuracy         = extras.getFloat(ServicesConstant.ACCURACY);
-            long   time             = extras.getLong(ServicesConstant.TIME);
-            double altitude         = extras.getDouble(ServicesConstant.ALTITUDE);
-            float  bearing          = extras.getFloat(ServicesConstant.BEARING);
-            float  speed            = extras.getFloat(ServicesConstant.SPEED);
+            int    USER_ID          = extras.getInt   (LocationServicesConstant.USER_ID);
+            double latitude         = extras.getDouble(LocationServicesConstant.LATITUDE);
+            double longitude        = extras.getDouble(LocationServicesConstant.LONGITUDE);
+            String locationProvider = extras.getString(LocationServicesConstant.LOCATION_PROVIDER);
+            Float  accuracy         = extras.getFloat(LocationServicesConstant.ACCURACY);
+            long   time             = extras.getLong(LocationServicesConstant.TIME);
+            double altitude         = extras.getDouble(LocationServicesConstant.ALTITUDE);
+            float  bearing          = extras.getFloat(LocationServicesConstant.BEARING);
+            float  speed            = extras.getFloat(LocationServicesConstant.SPEED);
 
 
             if(!isLocationInitialized) {
@@ -58,9 +58,10 @@ public class LocationBroadcast extends BroadcastReceiver
                     +" USER_ID "+USER_ID;
             Toast.makeText(context, "From BroadCast : "+s, Toast.LENGTH_SHORT).show();
 //            LoggerAndToastHandler.PrintToastMsg(s);
-        }else if(extras.getInt(ServicesConstant.SERVICE_ID) ==  ServicesConstant.SERVICE_ID_SEND_JSON_LOCATION)
+        }else if(extras.getInt(LocationServicesConstant.SERVICE_ID) ==
+                LocationServicesConstant.SERVICE_ID_SEND_JSON_LOCATION)
         {
-            String jsonLocation = extras.getString(ServicesConstant.JSON_LOCATION);
+            String jsonLocation = extras.getString(LocationServicesConstant.JSON_LOCATION);
 
             android.location.Location location = new Gson()
                     .fromJson(jsonLocation, android.location.Location.class);
@@ -82,7 +83,7 @@ public class LocationBroadcast extends BroadcastReceiver
                     +" speed "+ kMeter
                     +" accuracy "+location.getAccuracy();
 
-            //Toast.makeText(context, "AFrom BroadCast : "+s, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "AFrom BroadCast : "+s, Toast.LENGTH_SHORT).show();
         }
     }
 }

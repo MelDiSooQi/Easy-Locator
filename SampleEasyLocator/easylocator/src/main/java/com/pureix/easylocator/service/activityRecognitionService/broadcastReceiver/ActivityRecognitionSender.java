@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.google.android.gms.location.DetectedActivity;
 import com.pureix.easylocator.service.activityRecognitionService.Constants;
-import com.pureix.easylocator.service.locatonService.ServicesConstant;
 
 import java.util.ArrayList;
 
@@ -31,9 +30,9 @@ public class ActivityRecognitionSender
 
 //    public void sendLocationToApp(String jsonLocation)
 //    {
-//        intent.putExtra(ServicesConstant.SERVICE_ID     , ServicesConstant
+//        intent.putExtra(LocationServicesConstant.SERVICE_ID     , LocationServicesConstant
 //                .SERVICE_ID_SEND_JSON_LOCATION);
-//        intent.putExtra(ServicesConstant.JSON_LOCATION  , jsonLocation);
+//        intent.putExtra(LocationServicesConstant.JSON_LOCATION  , jsonLocation);
 //
 //        context.sendBroadcast(intent);
 //    }

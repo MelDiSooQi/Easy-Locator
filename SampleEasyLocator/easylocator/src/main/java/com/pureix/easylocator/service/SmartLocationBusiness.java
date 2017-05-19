@@ -9,6 +9,7 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.gson.Gson;
 import com.pureix.easylocator.controller.service.ActivityRecognitionAPI;
+import com.pureix.easylocator.controller.service.LocationAPI;
 import com.pureix.easylocator.model.ObservableHandler;
 import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.model.storage.LocalStorage;
@@ -41,6 +42,7 @@ public class SmartLocationBusiness
     public static final int LOCATION_PRIORITY_PRIORITY_NO_POWER
             = LocationRequest.PRIORITY_NO_POWER;
     private Timer mtimer;
+    private LocationAPI locationAPI;
 
     public void start(Context context) {
         this.context = context;
@@ -102,7 +104,13 @@ public class SmartLocationBusiness
         }
 
         if(DetectedActivity.ON_FOOT == type){
+            customSettingsLocation.setDetectedActivityType(type);
+            customSettingsLocation.setDetectedActivityProvider(activityRecognitionAPI.getActivityString(context, detectedActivity.getType()));
 
+            customSettingsLocation.setPriority(LOCATION_PRIORITY_PRIORITY_HIGH_ACCURACY);
+            customSettingsLocation.setInterval(4 * 1000);
+            customSettingsLocation.setFastestInterval(4 * 1000);
+            customSettingsLocation.setSmallestDisplacement(4);
         }
 
         if(DetectedActivity.WALKING == type){
@@ -165,7 +173,14 @@ public class SmartLocationBusiness
             customSettingsLocation.setSmallestDisplacement(10);
         }
 
-        saveCustomSettingsLocationInLocalStorage(time, customSettingsLocation);
+        reOpenLocationServiceWithNewSettings(customSettingsLocation);
+        //saveCustomSettingsLocationInLocalStorage(time, customSettingsLocation);
+    }
+
+    private void reOpenLocationServiceWithNewSettings(CustomSettingsLocation customSettings) {
+        locationAPI = new LocationAPI(context);
+
+        locationAPI.startCustomService(customSettings);
     }
 
     private void saveCustomSettingsLocationInLocalStorage(int time,
@@ -214,6 +229,7 @@ public class SmartLocationBusiness
     }
 
     public void pause() {
+        locationAPI.pause();
         activityRecognitionAPI.pause();
     }
 }

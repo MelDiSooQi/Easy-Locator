@@ -3,34 +3,31 @@ package com.pureix.easylocator.service.batteryService.broadcastReceiver;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
-
-import com.pureix.easylocator.service.activityRecognitionService.broadcastReceiver.ActivityRecognitionBroadcast;
 
 /**
  * Created by MelDiSooQi on 1/28/2017.
  */
 
-public class InitializeBatteryBroadcast
+public class InitializeBatteryFromAppBroadcast
 {
-    private static BatteryStateReceiver  broadcastReceiver              = null;
+    private static BatteryAppSideBroadcast broadcastReceiverFromApp    = null;
     private static Boolean isRegistered = false;
 
-    public InitializeBatteryBroadcast() {
+    public InitializeBatteryFromAppBroadcast() {
         initialize();
     }
 
     private void initialize()
     {
-        broadcastReceiver = new BatteryStateReceiver();
+        broadcastReceiverFromApp = new BatteryAppSideBroadcast();
     }
 
     public void onPause(Context context)
     {
         try {
             if (isRegistered) {
-                context.unregisterReceiver(broadcastReceiver);
+                context.unregisterReceiver(broadcastReceiverFromApp);
                 isRegistered = false;
             }
         }catch (Exception e)
@@ -41,8 +38,8 @@ public class InitializeBatteryBroadcast
     {
     if (!isRegistered)
     {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        context.registerReceiver(broadcastReceiver, filter);
+        IntentFilter filter = new IntentFilter("com.pureix.easylocator.service.batteryService.broadcastReceiver.BatteryAppSideBroadcast");
+        context.registerReceiver(broadcastReceiverFromApp, filter);
 
         isRegistered = true;
     }

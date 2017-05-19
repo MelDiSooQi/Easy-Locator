@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
-import com.pureix.easylocator.service.activityRecognitionService.ActivitiesRecognitionService;
-import com.pureix.easylocator.service.activityRecognitionService.broadcastReceiver.InitializeActivityRecognitionBroadcast;
+import com.google.android.gms.location.LocationRequest;
+import com.google.gson.Gson;
+import com.pureix.easylocator.model.bean.CustomSettingsLocation;
+import com.pureix.easylocator.service.locatonService.Constants;
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 import com.pureix.easylocator.service.locatonService.LocationService;
+import com.pureix.easylocator.service.locatonService.LocationServicesConstant;
 import com.pureix.easylocator.service.locatonService.broadcastReceiver.InitializeLocationBroadcast;
-import com.pureix.easylocator.service.locatonService.broadcastReceiver.LocationBroadcast;
 import com.pureix.easylocator.service.locatonService.permission.LocationPermission;
 
 import java.util.Observable;
@@ -32,6 +34,8 @@ public class LocationAPI
     private LocationPermission locationPermission;
     private LocationReceiverListener locationReceiverListener;
 
+    private CustomSettingsLocation customSettingsLocation;
+
     public LocationAPI(Context context)
     {
         this.context = context;
@@ -44,11 +48,30 @@ public class LocationAPI
 
     public void start()
     {
+        startCustomService(createCustomSettingsLocation());
+    }
+
+    private CustomSettingsLocation createCustomSettingsLocation() {
+        customSettingsLocation = new CustomSettingsLocation();
+
+        customSettingsLocation.setDetectedActivityType(-1);
+        customSettingsLocation.setDetectedActivityProvider("Normal");
+
+        customSettingsLocation.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        customSettingsLocation.setInterval(Constants.UPDATE_INTERVAL);
+        customSettingsLocation.setFastestInterval(Constants.FASTEST_INTERVAL);
+        customSettingsLocation.setSmallestDisplacement(0);
+
+        return customSettingsLocation;
+    }
+
+    public void startCustomService(CustomSettingsLocation customSettingsLocation) {
         broadcast = new InitializeLocationBroadcast();
         broadcast.onResume(context);
 
         Intent i = new Intent(context, LocationService.class);
         context.stopService(i);
+        i.putExtra(LocationServicesConstant.CUSTOM_SETTINGS_LOCATION, new Gson().toJson(customSettingsLocation));
         context.startService(i);
     }
 

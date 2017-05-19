@@ -3,7 +3,7 @@ package com.pureix.easylocator.service.locatonService;
 /**
  * Created by M.Hayle on 6/29/2016.
  */
-public class ServicesConstant
+public class LocationServicesConstant
 {
     //==========================S Location Service=================================
     public final static String  SERVICE_ID                      = "SERVICE_ID";
@@ -23,4 +23,6 @@ public class ServicesConstant
     public final static String BEARING              = "BEARING";
     public final static String SPEED                = "SPEED";
     //==========================E Location Service=================================
+
+    public final static String CUSTOM_SETTINGS_LOCATION   = "CUSTOM_SETTINGS_LOCATION";
 }

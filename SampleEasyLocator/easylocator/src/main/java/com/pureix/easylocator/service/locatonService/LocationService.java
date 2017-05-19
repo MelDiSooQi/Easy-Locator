@@ -12,7 +12,6 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -25,17 +24,11 @@ import com.google.gson.Gson;
 import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.model.storage.LocalStorage;
 import com.pureix.easylocator.model.storage.LocalStorageConstant;
-import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 import com.pureix.easylocator.service.locatonService.broadcastReceiver.LocationBroadcast;
 import com.pureix.easylocator.service.locatonService.broadcastReceiver.LocationSender;
 
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static com.pureix.easylocator.service.SmartLocationBusiness.smartLocationBusinessObservable;
 
 /**
  * Created by MelDiSooQi on 1/28/2017.
@@ -64,7 +57,9 @@ public class LocationService extends Service implements
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private GoogleApiClient mGoogleApiClient;
-    private LocationReceiverListener locationReceiverListener;
+    private CustomSettingsLocation customSettingsLocation;
+
+    //private LocationReceiverListener locationReceiverListener;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -84,9 +79,19 @@ public class LocationService extends Service implements
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.e(TAG, "onCreate");
+        context = getApplicationContext();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.e(TAG, "onStartCommand");
+
+        getIntentExtrasData(intent);
+        asOnCreate();
 
         PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
@@ -116,26 +121,62 @@ public class LocationService extends Service implements
         return START_STICKY;
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.e(TAG, "onCreate");
-        context = getApplicationContext();
+    private void getIntentExtrasData(Intent intent) {
+        if(intent != null) {
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                String jsonCustomSettingsLocation = extras.getString(LocationServicesConstant.CUSTOM_SETTINGS_LOCATION);
 
-        senderHandler 	= new LocationSender(context,
-                LocationBroadcast.class);
+                customSettingsLocation = new Gson()
+                        .fromJson(jsonCustomSettingsLocation, CustomSettingsLocation.class);
+            }
+        }
+
+        if(customSettingsLocation == null)
+        {
+            createCustomSettingsLocation();
+        }
+    }
+
+    private CustomSettingsLocation createCustomSettingsLocation() {
+        customSettingsLocation = new CustomSettingsLocation();
+
+        customSettingsLocation.setDetectedActivityType(-1);
+        customSettingsLocation.setDetectedActivityProvider("Normal");
+
+        customSettingsLocation.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        customSettingsLocation.setInterval(Constants.UPDATE_INTERVAL);
+        customSettingsLocation.setFastestInterval(Constants.FASTEST_INTERVAL);
+        customSettingsLocation.setSmallestDisplacement(0);
+
+        return customSettingsLocation;
+    }
+
+    private void asOnCreate(){
+
+        senderHandler 	= new LocationSender(context, LocationBroadcast.class);
 
         mInProgress = false;
         // Create the LocationRequest object
         mLocationRequest = LocationRequest.create();
+
         // Use high accuracy
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setPriority(customSettingsLocation.getPriority());
         // Set the update interval to 5 seconds
-        mLocationRequest.setInterval(Constants.UPDATE_INTERVAL);
+        mLocationRequest.setInterval(customSettingsLocation.getInterval());
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(customSettingsLocation.getFastestInterval());
+        //update the location every some distance
+        mLocationRequest.setSmallestDisplacement(customSettingsLocation.getSmallestDisplacement());
+
+        // Use high accuracy
+        //mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 5 seconds
+        //mLocationRequest.setInterval(Constants.UPDATE_INTERVAL);
 //        mLocationRequest.setInterval(1000);
         // Set the fastest update interval to 1 second
 //        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setFastestInterval(Constants.FASTEST_INTERVAL);
+        //mLocationRequest.setFastestInterval(Constants.FASTEST_INTERVAL);
         //update the location every some distance
         //mLocationRequest.setSmallestDisplacement(10);
 
@@ -260,10 +301,10 @@ public class LocationService extends Service implements
         try {
             Location location = getLastLocation();
             sendLocationToBroadcast(location);
-            if(locationReceiverListener !=null) {
+            /*if(locationReceiverListener !=null) {
                 locationReceiverListener.getLastKnownLocation(location);
 //                locationReceiverListener.onLocationChanged(location);
-            }
+            }*/
         } catch (Exception e) {
         }
         // Request location updates using static settings
@@ -448,9 +489,9 @@ public class LocationService extends Service implements
         }
 
         sendLocationToBroadcast(location);
-        if(locationReceiverListener != null) {
-            locationReceiverListener.onLocationChanged(location);
-        }
+//        if(locationReceiverListener != null) {
+//            locationReceiverListener.onLocationChanged(location);
+//        }
     }
 
     private CustomSettingsLocation getCustomSettingsLocationInLocalStorage() {

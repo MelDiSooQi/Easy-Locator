@@ -17,6 +17,7 @@ import com.pureix.easylocator.controller.service.BatteryAPI;
 import com.pureix.easylocator.controller.service.InternetAPI;
 import com.pureix.easylocator.controller.service.LocationAPI;
 import com.pureix.easylocator.controller.service.SmartLocationAPI;
+import com.pureix.easylocator.service.batteryService.bean.BatteryInformation;
 import com.pureix.easylocator.model.bean.CustomSettingsLocation;
 import com.pureix.easylocator.service.batteryService.listener.BatteryReceiverListener;
 import com.pureix.easylocator.service.activityRecognitionService.listener.ActivityRecognitionListener;
@@ -24,12 +25,17 @@ import com.pureix.easylocator.service.internetService.listener.ConnectivityRecei
 import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
+import static com.pureix.easylocator.service.batteryService.broadcastReceiver.BatteryAppSideBroadcast.batteryChangedObservable;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView txt;
     private LocationAPI locationAPI;
     private ActivityRecognitionAPI activityRecognitionAPI;
+    private BatteryAPI batteryAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         txt = (TextView) findViewById(R.id.txt);
+
         activityRecognitionAPI = new ActivityRecognitionAPI(MainActivity.this);
         activityRecognitionAPI.setActivitiesRecognitionListener(new ActivityRecognitionListener()
         {
@@ -63,16 +70,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        BatteryAPI.start(MainActivity.this);
-        BatteryAPI.batteryListener(new BatteryReceiverListener() {
+        batteryAPI = new BatteryAPI(MainActivity.this);
+
+        batteryAPI.batteryListener(new BatteryReceiverListener() {
             @Override
-            public void onBatteryInformationChanged(int level, int scale, int temperature, int voltage, float batteryPct, int status, boolean isCharging, int chargePlug, boolean usbCharge, boolean acCharge) {
-                txt.append("level is " + level + "/" + scale +
-                        ", temp is " + temperature +
-                        ", voltage is " + voltage
-                        + " status :" + status +
-                        " chargePlug :" + chargePlug +
-                        " Battery Pct : " + batteryPct * 100 +"\n\n");
+            public void onBatteryInformationChanged(BatteryInformation batteryInformation) {
+                txt.append("level is " + batteryInformation.getLevel()
+                        + "/" + batteryInformation.getScale() +
+                        ", temp is " + batteryInformation.getTemperature() +
+                        ", voltage is " + batteryInformation.getTemperature()
+                        + " status :" + batteryInformation.getStatus() +
+                        " chargePlug :" + batteryInformation.getChargePlug() +
+                        " Battery Pct : " + batteryInformation.getBatteryPct() * 100 +"\n\n");
             }
         });
 
@@ -101,12 +110,12 @@ public class MainActivity extends AppCompatActivity {
         smartLocationAPI.setLocationReceiverListener(new LocationReceiverListener() {
             @Override
             public void getLastKnownLocation(Location location) {
-
+                txt.append("Smart getLastKnownLocation "+location+"\n\n");
             }
 
             @Override
             public void onLocationChanged(Location location) {
-
+                txt.append("Smart onLocationChanged "+location+"\n\n");
             }
         });
 
@@ -150,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         activityRecognitionAPI.start();
         locationAPI.start();
+        batteryAPI.start();
     }
 
     @Override
@@ -157,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         activityRecognitionAPI.pause();
         locationAPI.pause();
+        batteryAPI.pause();
     }
 
     @Override
